@@ -12,6 +12,7 @@
 #include "event2/http_compat.h"
 #include "event2/util.h"
 #include "event2/listener.h"
+#include "myhttpserver.h"
 
 #define BUF_MAX 1024*16
 
@@ -178,20 +179,18 @@ void http_handler_testpost_msg(struct evhttp_request *req,void *arg)
 	evbuffer_free(retbuff);
 }
 
-int main()
+void copying_code()
 {
 	struct evhttp *http_server = NULL;
 	short http_port = 8081;
 	char *http_addr = "0.0.0.0";
 	
-	//初始化
-	event_init();
 	//启动http服务端
 	http_server = evhttp_start(http_addr,http_port);
 	if(http_server == NULL)
 	{
 		printf("====line:%d,%s\n",__LINE__,"http server start failed.");
-		return -1;
+		return ;
 	}
 	
 	//设置请求超时时间(s)
@@ -200,7 +199,21 @@ int main()
 	//区别于evhttp_set_gencb函数，是对所有请求设置一个统一的处理函数
 	evhttp_set_cb(http_server,"/me/testpost",http_handler_testpost_msg,NULL);
 	evhttp_set_cb(http_server,"/me/testget",http_handler_testget_msg,NULL);
+}
+
+int main()
+{
+	struct evhttp *http_server = NULL;
+	short http_port = 8081;
+	char *http_addr = "0.0.0.0";
 	
+	//初始化
+	event_init();
+		
+	CMyHttpServer server;
+	server.StartServer(http_port);
+		
+
 	//循环监听
 	event_dispatch();
 	//实际上不会释放，代码不会运行到这一步
